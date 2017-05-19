@@ -74,7 +74,7 @@ sed -i 's%\(keep-running.*\)%keep-running -e /root/tripleo-heat-templates/enviro
 
 cat > $HOME/cleanup.sh <<EOF
 #!/usr/bin/env bash
-pcs cluster stop --force
+pcs cluster destroy
 set -x
 rm -rf /var/lib/mysql
 rm -rf /var/log/puppet
