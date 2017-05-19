@@ -27,15 +27,12 @@ ln -s $HOME/gerrit/tripleo-common/container-images/tripleo_kolla_template_overri
 sudo pip install -r requirements.txt
 sudo python setup.py install
 cat > kolla-build.conf <<EOF
--EOF_CAT
 [DEFAULT]
 base=centos
 type=binary
 rpm_setup_config = http://trunk.rdoproject.org/centos7/current/delorean.repo,http://trunk.rdoproject.org/centos7/delorean-deps.repo
-EOF_CAT
-popd
-
 EOF
+popd
 
 # create config files for deploying the HA containers
 cat > $THT/environments/ha-docker.yaml <<EOF
