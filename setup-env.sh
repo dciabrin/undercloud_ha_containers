@@ -2,7 +2,7 @@
 
 # dependencies
 yum install -y git python2-pip emacs-nox yum-utils ntp fence-agents-all
-pip install git-review
+pip install git-review netaddr
 yum install -y centos-release-openstack-ocata
 yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
 
@@ -33,6 +33,30 @@ type=binary
 rpm_setup_config = http://trunk.rdoproject.org/centos7/current/delorean.repo,http://trunk.rdoproject.org/centos7/delorean-deps.repo
 EOF
 popd
+
+# force unique virtual ips for pacemaker haproxy service
+LOCAL_IP=${LOCAL_IP:-`/usr/sbin/ip -4 route get 8.8.8.8 | awk {'print $7'} | tr -d '\n'`}
+LOCAL_IP_NETWORK=$(ip a | grep "$LOCAL_IP" | awk '{print $2}')
+
+. $(dirname $0)/vip-config
+CONTROLLER_VIRTUAL_IP=${CONTROLLER_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-2]")}
+INTERNAL_API_VIRTUAL_IP=${INTERNAL_API_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-3]")}
+KEYSTONE_ADMIN_API_VIP=${KEYSTONE_ADMIN_API_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-4]")}
+KEYSTONE_PUBLIC_API_VIP=${KEYSTONE_PUBLIC_API_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-5]")}
+PUBLIC_VIRTUAL_IP=${PUBLIC_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-6]")}
+REDIS_VIP=${REDIS_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-7]")}
+STORAGE_MGMT_VIRTUAL_IP=${STORAGE_MGMT_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-8]")}
+STORAGE_VIRTUAL_IP=${STORAGE_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-9]")}
+
+VIP_CONFIG=$HOME/tripleo-heat-templates/puppet/all-nodes-config.yaml
+sed -i 's%\(controller_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$CONTROLLER_VIRTUAL_IP'%' $VIP_CONFIG
+sed -i 's%\(internal_api_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$INTERNAL_API_VIRTUAL_IP'%' $VIP_CONFIG
+sed -i 's%get_param: \[NetVipMap.*keystone_public_api_network.*%'$KEYSTONE_PUBLIC_API_VIP'%' $VIP_CONFIG
+sed -i 's%get_param: \[NetVipMap.*keystone_admin_api_network.*%'$KEYSTONE_ADMIN_API_VIP'%' $VIP_CONFIG
+sed -i 's%\(public_virtual_ip:\) {get_param: \[NetVipMap.*}%\1 '$PUBLIC_VIRTUAL_IP'%' $VIP_CONFIG
+sed -i 's%\(redis_vip:\) {get_param: RedisVirtualIP}.*%\1 '$REDIS_VIP'%' $VIP_CONFIG
+sed -i 's%\(storage_mgmt_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$STORAGE_MGMT_VIRTUAL_IP'%' $VIP_CONFIG
+sed -i 's%\(storage_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$STORAGE_VIRTUAL_IP'%' $VIP_CONFIG
 
 # create config files for deploying the HA containers
 cat > $THT/environments/ha-docker.yaml <<EOF
