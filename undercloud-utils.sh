@@ -1,4 +1,4 @@
-. $(dirname $0)/gerrit-credentials
+. $(dirname ${BASH_SOURCE[0]})/gerrit-credentials
 
 export THT=$HOME/tripleo-heat-templates
 export PP=/etc/puppet/modules/tripleo

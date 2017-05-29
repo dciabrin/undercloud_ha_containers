@@ -17,7 +17,7 @@ sed -i 's%\(OS::TripleO::Undercloud::Net::SoftwareConfig:.*\)$%OS::TripleO::Unde
 
 # clone the HA reviews and set hard link in tripleo-heat-templates and
 # puppet-tripleo directories
-. $(dirname $0)/clone-reviews.sh
+. $(dirname ${BASH_SOURCE[0]})/clone-reviews.sh
 
 # setup kolla build environment
 mkdir $HOME/kolla
@@ -38,7 +38,7 @@ popd
 LOCAL_IP=${LOCAL_IP:-`/usr/sbin/ip -4 route get 8.8.8.8 | awk {'print $7'} | tr -d '\n'`}
 LOCAL_IP_NETWORK=$(ip a | grep "$LOCAL_IP" | awk '{print $2}')
 
-. $(dirname $0)/vip-config
+. $(dirname ${BASH_SOURCE[0]})/vip-config
 CONTROLLER_VIRTUAL_IP=${CONTROLLER_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-2]")}
 INTERNAL_API_VIRTUAL_IP=${INTERNAL_API_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-3]")}
 KEYSTONE_ADMIN_API_VIP=${KEYSTONE_ADMIN_API_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-4]")}
@@ -68,6 +68,7 @@ resource_registry:
   OS::TripleO::Services::Redis: ../docker/services/pacemaker/database/redis.yaml
   OS::TripleO::Services::HAProxy: ../docker/services/pacemaker/haproxy.yaml
   OS::TripleO::Services::Clustercheck: ../docker/services/pacemaker/clustercheck.yaml
+  OS::TripleO::Services::CinderVolume: ../docker/services/pacemaker/cinder-volume.yaml
 
   OS::TripleO::PostDeploySteps: ../docker/post.yaml
   OS::TripleO::PostUpgradeSteps: ../docker/post-upgrade.yaml
@@ -92,6 +93,7 @@ cat > $THT/environments/roles_data_undercloud.yaml <<EOF
     - OS::TripleO::Services::MySQL
     - OS::TripleO::Services::Clustercheck
     - OS::TripleO::Services::HAProxy
+    - OS::TripleO::Services::CinderVolume
 EOF
 
 sed -i 's%\(keep-running.*\)%keep-running -e /root/tripleo-heat-templates/environments/puppet-pacemaker.yaml -e /root/tripleo-heat-templates/environments/ha-docker.yaml -e /root/custom.yaml%' $HOME/run.sh
