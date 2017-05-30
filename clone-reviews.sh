@@ -25,4 +25,5 @@ co_repo puppet-pacemaker puppet-pacemaker 463170
 
 # MERGED
 # co_repo tripleo-common tripleo-common 456174
+co_repo tripleo-common tripleo-common
 popd
