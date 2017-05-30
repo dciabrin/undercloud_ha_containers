@@ -47,6 +47,7 @@ PUBLIC_VIRTUAL_IP=${PUBLIC_VIRTUAL_IP:-$(python -c "import netaddr; print netadd
 REDIS_VIP=${REDIS_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-7]")}
 STORAGE_MGMT_VIRTUAL_IP=${STORAGE_MGMT_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-8]")}
 STORAGE_VIRTUAL_IP=${STORAGE_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-9]")}
+MYSQL_VIP=${MYSQL_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-10]")}
 
 VIP_CONFIG=$HOME/tripleo-heat-templates/puppet/all-nodes-config.yaml
 sed -i 's%\(controller_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$CONTROLLER_VIRTUAL_IP'%' $VIP_CONFIG
@@ -57,6 +58,7 @@ sed -i 's%\(public_virtual_ip:\) {get_param: \[NetVipMap.*}%\1 '$PUBLIC_VIRTUAL_
 sed -i 's%\(redis_vip:\) {get_param: RedisVirtualIP}.*%\1 '$REDIS_VIP'%' $VIP_CONFIG
 sed -i 's%\(storage_mgmt_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$STORAGE_MGMT_VIRTUAL_IP'%' $VIP_CONFIG
 sed -i 's%\(storage_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$STORAGE_VIRTUAL_IP'%' $VIP_CONFIG
+sed -i 's%\( *\)\(redis_vip:.*\)%\1\2\n\1mysql_vip: '$MYSQL_VIP'%' $VIP_CONFIG
 
 # create config files for deploying the HA containers
 cat > $THT/environments/ha-docker.yaml <<EOF
