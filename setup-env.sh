@@ -102,10 +102,15 @@ sed -i 's%\(keep-running.*\)%keep-running -e /root/tripleo-heat-templates/enviro
 
 cat > $HOME/cleanup.sh <<EOF
 #!/usr/bin/env bash
-pcs cluster destroy
 set -x
+pcs cluster destroy
+killall epmd
 rm -rf /var/lib/mysql
-rm -rf /var/log/puppet
+rm -rf /var/lib/rabbitmq
+for i in /var/log/puppet /var/lib/config-data /var/lib/heat-config/deployed /etc/puppet/hieradata /var/lib/docker-puppet /var/log/pacemaker/bundles; do
+  find $i/ -type f -or -type l -delete
+  rm -rf $i/*
+done
 sudo docker ps -qa | xargs sudo docker rm -f
 sudo docker volume ls -q | xargs sudo docker volume rm
 EOF
