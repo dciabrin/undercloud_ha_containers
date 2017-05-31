@@ -65,8 +65,6 @@ sed -i 's%\( *\)\(redis_vip:.*\)%\1\2\n\1glance_api_vip: '$GLANCE_API_VIP'%' $VI
 # create config files for deploying the HA containers
 cat > $THT/environments/ha-docker.yaml <<EOF
 resource_registry:
-  OS::TripleO::Services::Docker: ../puppet/services/docker.yaml
-  OS::TripleO::Compute::NodeUserData: ../docker/firstboot/setup_docker_host.yaml
   OS::TripleO::Services::MySQL: ../docker/services/pacemaker/database/mysql.yaml
   OS::TripleO::Services::RabbitMQ: ../docker/services/pacemaker/rabbitmq.yaml
   OS::TripleO::Services::Redis: ../docker/services/pacemaker/database/redis.yaml
@@ -74,16 +72,12 @@ resource_registry:
   OS::TripleO::Services::Clustercheck: ../docker/services/pacemaker/clustercheck.yaml
   OS::TripleO::Services::CinderVolume: ../docker/services/pacemaker/cinder-volume.yaml
 
-  OS::TripleO::PostDeploySteps: ../docker/post.yaml
-  OS::TripleO::PostUpgradeSteps: ../docker/post-upgrade.yaml
-  OS::TripleO::Services: ../docker/services/services.yaml
-
 parameter_defaults:
   DockerNamespace: 192.168.24.1:8787/tripleoupstream
   DockerNamespaceIsRegistry: true
 EOF
 
-cat > $THT/environments/roles_data_undercloud.yaml <<EOF
+cat > $THT/roles_data_undercloud.yaml <<EOF
 - name: Undercloud
   CountDefault: 1
   disable_constraints: True
@@ -91,16 +85,20 @@ cat > $THT/environments/roles_data_undercloud.yaml <<EOF
     - primary
     - controller
   ServicesDefault:
+    - OS::TripleO::Services::TripleoFirewall
     - OS::TripleO::Services::Pacemaker
     - OS::TripleO::Services::RabbitMQ
     - OS::TripleO::Services::Redis
-    - OS::TripleO::Services::MySQL
-    - OS::TripleO::Services::Clustercheck
     - OS::TripleO::Services::HAProxy
+    - OS::TripleO::Services::MySQL
+    - OS::TripleO::Services::MySQLClient
+    - OS::TripleO::Services::Clustercheck
     - OS::TripleO::Services::CinderVolume
+    - OS::TripleO::Services::Keystone
+    - OS::TripleO::Services::GlanceApi
 EOF
 
-sed -i 's%\(keep-running.*\)%keep-running -e /root/tripleo-heat-templates/environments/puppet-pacemaker.yaml -e /root/tripleo-heat-templates/environments/ha-docker.yaml -e /root/custom.yaml%' $HOME/run.sh
+sed -i 's%\(keep-running.*\)%keep-running -e /root/tripleo-heat-templates/environments/puppet-pacemaker.yaml -e /root/tripleo-heat-templates/environments/docker.yaml -e /root/tripleo-heat-templates/environments/ha-docker.yaml -e /root/custom.yaml%' $HOME/run.sh
 
 cat > $HOME/cleanup.sh <<EOF
 #!/usr/bin/env bash
