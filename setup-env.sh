@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # dependencies
-yum install -y git python2-pip emacs-nox yum-utils ntp fence-agents-all
-pip install git-review netaddr
 yum install -y centos-release-openstack-ocata
+yum install -y python2-pip emacs-nox yum-utils ntp fence-agents-all
+pip install git-review netaddr
 yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
 
 # prepare a local registry and all docker to read from it over http
