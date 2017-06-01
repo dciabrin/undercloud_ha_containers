@@ -6,10 +6,18 @@ pip install git-review netaddr
 yum install -y centos-release-openstack-ocata
 yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
 
-# install dprince's containerized undercloud environment
+# prepare a local registry and all docker to read from it over http
 LOCAL_IFACE=${LOCAL_IFACE:-`/usr/sbin/ip -4 route get 8.8.8.8 | awk {'print $5'} | tr -d '\n'`}
 ip a add 192.168.24.1/32 dev $LOCAL_IFACE
 export LOCAL_REGISTRY=192.168.24.1:8787
+echo "INSECURE_REGISTRY='--insecure-registry ${LOCAL_REGISTRY}'" >> /etc/sysconfig/docker
+sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
+systemctl enable docker docker-distribution
+systemctl stop docker docker-distribution
+systemctl start docker docker-distribution
+
+# install dprince's containerized undercloud environment
+# configure it based on LOCAL_IFACE and LOCAL_REGISTRY
 git clone https://github.com/dprince/undercloud_containers $HOME/undercloud_containers
 (cd $HOME/undercloud_containers && ./doit.sh)
 # assume machine is running on a single NIC for the time being
