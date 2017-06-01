@@ -15,6 +15,15 @@ git clone https://github.com/dprince/undercloud_containers $HOME/undercloud_cont
 # assume machine is running on a single NIC for the time being
 sed -i 's%\(OS::TripleO::Undercloud::Net::SoftwareConfig:.*\)$%OS::TripleO::Undercloud::Net::SoftwareConfig: ../net-config-noop.yaml%' $HOME/tripleo-heat-templates/environments/undercloud.yaml
 
+# re-clone tripleo-heat-templates and cherry pick a few ongoing reviews (cinder)
+rm -rf $HOME/tripleo-heat-templates
+git clone https://github.com/openstack/tripleo-heat-templates $HOME/tripleo-heat-templates
+pushd $HOME/tripleo-heat-templates
+git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/38/462538/4 && git cherry-pick FETCH_HEAD
+git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/89/465989/3 && git cherry-pick FETCH_HEAD
+git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/11/457011/14 && git cherry-pick FETCH_HEAD
+popd
+
 # clone the HA reviews and set hard link in tripleo-heat-templates and
 # puppet-tripleo directories
 . $(dirname ${BASH_SOURCE[0]})/clone-reviews.sh
@@ -93,6 +102,7 @@ cat > $THT/roles_data_undercloud.yaml <<EOF
     - OS::TripleO::Services::MySQL
     - OS::TripleO::Services::MySQLClient
     - OS::TripleO::Services::Clustercheck
+    - OS::TripleO::Services::CinderApi
     - OS::TripleO::Services::CinderVolume
     - OS::TripleO::Services::Keystone
     - OS::TripleO::Services::GlanceApi
