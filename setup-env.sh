@@ -2,7 +2,9 @@
 
 # dependencies
 yum install -y centos-release-openstack-ocata
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install -y python2-pip emacs-nox yum-utils ntp fence-agents-all
+yum install -y puppet-tripleo puppet-pacemaker
 pip install git-review netaddr
 yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
 
@@ -10,11 +12,6 @@ yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-r
 LOCAL_IFACE=${LOCAL_IFACE:-`/usr/sbin/ip -4 route get 8.8.8.8 | awk {'print $5'} | tr -d '\n'`}
 ip a add 192.168.24.1/32 dev $LOCAL_IFACE
 export LOCAL_REGISTRY=192.168.24.1:8787
-echo "INSECURE_REGISTRY='--insecure-registry ${LOCAL_REGISTRY}'" >> /etc/sysconfig/docker
-sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
-systemctl enable docker docker-distribution
-systemctl stop docker docker-distribution
-systemctl start docker docker-distribution
 
 # install dprince's containerized undercloud environment
 # configure it based on LOCAL_IFACE and LOCAL_REGISTRY
@@ -22,6 +19,13 @@ git clone https://github.com/dprince/undercloud_containers $HOME/undercloud_cont
 (cd $HOME/undercloud_containers && ./doit.sh)
 # assume machine is running on a single NIC for the time being
 sed -i 's%\(OS::TripleO::Undercloud::Net::SoftwareConfig:.*\)$%OS::TripleO::Undercloud::Net::SoftwareConfig: ../net-config-noop.yaml%' $HOME/tripleo-heat-templates/environments/undercloud.yaml
+
+yum install docker docker-registry
+echo "INSECURE_REGISTRY='--insecure-registry ${LOCAL_REGISTRY}'" >> /etc/sysconfig/docker
+sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
+systemctl enable docker docker-distribution
+systemctl stop docker docker-distribution
+systemctl start docker docker-distribution
 
 # re-clone tripleo-heat-templates and cherry pick a few ongoing reviews (cinder)
 rm -rf $HOME/tripleo-heat-templates
