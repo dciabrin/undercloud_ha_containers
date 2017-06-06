@@ -12,8 +12,8 @@ git clone https://github.com/openstack/${os_project} ${co_dir}
 pushd $co_dir &>/dev/null
 git remote add gerrit https://${GITREVIEW_USERNAME}@review.openstack.org/openstack/${os_project}.git
 git config gitreview.username ${GITREVIEW_USERNAME}
-git config user.name ${GIT_USER_NAME}
-git config user.email ${GIT_USER_EMAIL}
+git config user.name "${GIT_USER_NAME}"
+git config user.email "${GIT_USER_EMAIL}"
 if [ -n "$review" ]; then
     git review -d $review
 else
