@@ -3,6 +3,7 @@
 # dependencies
 yum install -y centos-release-openstack-ocata
 yum install -y python2-pip emacs-nox yum-utils ntp fence-agents-all
+yum install -y openstack-tripleo-heat-templates
 pip install git-review netaddr
 yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
 
