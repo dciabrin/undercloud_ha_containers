@@ -88,6 +88,7 @@ resource_registry:
   OS::TripleO::Services::HAProxy: ../docker/services/pacemaker/haproxy.yaml
   OS::TripleO::Services::Clustercheck: ../docker/services/pacemaker/clustercheck.yaml
   OS::TripleO::Services::CinderVolume: ../docker/services/pacemaker/cinder-volume.yaml
+  OS::TripleO::Services::CinderBackup: ../docker/services/pacemaker/cinder-backup.yaml
 
 parameter_defaults:
   DockerNamespace: 192.168.24.1:8787/tripleoupstream
