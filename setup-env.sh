@@ -28,8 +28,6 @@ fi
 # configure it based on LOCAL_IFACE and LOCAL_REGISTRY
 git clone https://github.com/dprince/undercloud_containers $HOME/undercloud_containers
 (cd $HOME/undercloud_containers && ./doit.sh)
-# assume machine is running on a single NIC for the time being
-sed -i 's%\(OS::TripleO::Undercloud::Net::SoftwareConfig:.*\)$%OS::TripleO::Undercloud::Net::SoftwareConfig: ../net-config-noop.yaml%' $HOME/tripleo-heat-templates/environments/undercloud.yaml
 
 if [ -x ./post-uc-setup.sh ]; then
     ./post-uc-setup.sh
@@ -37,20 +35,26 @@ else
     yum-config-manager --disable epel epel-testing delorean delorean-pike-testing
 fi
 
-yum install docker docker-registry
+yum install -y docker docker-registry
 echo "INSECURE_REGISTRY='--insecure-registry ${LOCAL_REGISTRY}'" "${DOCKER_REGISTRY_EXTRA_CONFIG}" >> /etc/sysconfig/docker
 sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
 systemctl enable docker docker-distribution
 systemctl stop docker docker-distribution
 systemctl start docker docker-distribution
 
-# re-clone tripleo-heat-templates and cherry pick a few ongoing reviews (cinder)
+# re-clone tripleo-heat-templates and cherry pick cinder and manila ongoing reviews
 rm -rf $HOME/tripleo-heat-templates
 git clone https://github.com/openstack/tripleo-heat-templates $HOME/tripleo-heat-templates
 pushd $HOME/tripleo-heat-templates
-git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/38/462538/4 && git cherry-pick FETCH_HEAD
-git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/89/465989/3 && git cherry-pick FETCH_HEAD
-git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/11/457011/14 && git cherry-pick FETCH_HEAD
+# iscsid
+git fetch git://git.openstack.org/openstack/tripleo-heat-templates refs/changes/38/462538/9 && git cherry-pick FETCH_HEAD
+# multipathd
+# git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/89/465989/3 && git cherry-pick FETCH_HEAD
+# cinder-api
+# git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/11/457011/14 && git cherry-pick FETCH_HEAD
+# cinder-volume
+# git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/20/457820/10 && git cherry-pick FETCH_HEAD
+# manila-share
 popd
 
 # clone the HA reviews and set hard link in tripleo-heat-templates and

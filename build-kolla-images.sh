@@ -12,7 +12,7 @@ rpm_setup_config = http://trunk.rdoproject.org/centos7/current/delorean.repo,htt
 EOF
 
 TAG=${DOCKER_IMAGE_TAG:-latest}
-KOLLA_TAG=4.0.0
+KOLLA_TAG=5.0.0
 
 PULL_IMGS="glance-api keystone"
 for i in $PULL_IMGS; do sudo docker pull tripleoupstream/centos-binary-$i:$TAG; done

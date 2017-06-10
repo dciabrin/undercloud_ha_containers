@@ -6,6 +6,9 @@
 . $(dirname ${BASH_SOURCE[0]})/config
 . $(dirname ${BASH_SOURCE[0]})/vip-config
 
+# assume machine is running on a single NIC for the time being
+sed -i 's%\(OS::TripleO::Undercloud::Net::SoftwareConfig:.*\)$%OS::TripleO::Undercloud::Net::SoftwareConfig: ../net-config-noop.yaml%' $HOME/tripleo-heat-templates/environments/undercloud.yaml
+
 # force unique virtual ips for pacemaker haproxy service
 LOCAL_IP=${LOCAL_IP:-`/usr/sbin/ip -4 route get 8.8.8.8 | awk {'print $7'} | tr -d '\n'`}
 LOCAL_IP_NETWORK=$(ip a | grep "$LOCAL_IP" | awk '{print $2}')
@@ -82,8 +85,8 @@ killall epmd
 rm -rf /var/lib/mysql
 rm -rf /var/lib/rabbitmq
 for i in /var/log/puppet /var/lib/config-data /var/lib/heat-config/deployed /etc/puppet/hieradata /var/lib/docker-puppet /var/log/pacemaker/bundles; do
-  find $i/ -type f -or -type l -delete
-  rm -rf $i/*
+  find \$i/ -type f -or -type l -delete
+  rm -rf \$i/*
 done
 sudo docker ps -qa | xargs sudo docker rm -f
 sudo docker volume ls -q | xargs sudo docker volume rm
