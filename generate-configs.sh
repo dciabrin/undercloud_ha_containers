@@ -67,10 +67,10 @@ cat > $THT/roles_data_undercloud.yaml <<EOF
     - OS::TripleO::Services::Redis
     - OS::TripleO::Services::HAproxy
     - OS::TripleO::Services::MySQL
-    - OS::TripleO::Services::MySQLClient
+    # - OS::TripleO::Services::MySQLClient
     - OS::TripleO::Services::Clustercheck
-    - OS::TripleO::Services::CinderApi
-    - OS::TripleO::Services::CinderVolume
+    # - OS::TripleO::Services::CinderVolume
+    # - OS::TripleO::Services::CinderBackup
     - OS::TripleO::Services::Keystone
     - OS::TripleO::Services::GlanceApi
 EOF
