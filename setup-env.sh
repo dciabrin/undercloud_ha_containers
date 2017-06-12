@@ -37,7 +37,7 @@ else
 fi
 
 yum install -y docker docker-registry
-echo "INSECURE_REGISTRY='--insecure-registry ${LOCAL_REGISTRY}'" "${DOCKER_REGISTRY_EXTRA_CONFIG}" >> /etc/sysconfig/docker
+echo "\"INSECURE_REGISTRY=--insecure-registry ${LOCAL_REGISTRY} ${DOCKER_REGISTRY_EXTRA_CONFIG}\"" >> /etc/sysconfig/docker
 sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
 systemctl enable docker docker-distribution
 systemctl stop docker docker-distribution
