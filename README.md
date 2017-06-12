@@ -1,11 +1,11 @@
 # Containerized HA undercloud
 
-This repo contains a series of script for setting up a minimal
+This repo contains a series of scripts for setting up a minimal
 containerized tripleo undercloud configured with HA settings (pacemaker).
 
 It is based on
 [undercloud_containers](https://github.com/dprince/undercloud_containers)
-and prepare the setup for ongoing development on HA and containers.
+and prepares the setup for ongoing developments around containerized HA.
 
 ## Example setup
 
