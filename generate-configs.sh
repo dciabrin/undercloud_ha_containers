@@ -43,7 +43,7 @@ resource_registry:
   OS::TripleO::Services::MySQL: ../docker/services/pacemaker/database/mysql.yaml
   OS::TripleO::Services::RabbitMQ: ../docker/services/pacemaker/rabbitmq.yaml
   OS::TripleO::Services::Redis: ../docker/services/pacemaker/database/redis.yaml
-  OS::TripleO::Services::HAProxy: ../docker/services/pacemaker/haproxy.yaml
+  OS::TripleO::Services::HAproxy: ../docker/services/pacemaker/haproxy.yaml
   OS::TripleO::Services::Clustercheck: ../docker/services/pacemaker/clustercheck.yaml
   OS::TripleO::Services::CinderVolume: ../docker/services/pacemaker/cinder-volume.yaml
   OS::TripleO::Services::CinderBackup: ../docker/services/pacemaker/cinder-backup.yaml
@@ -65,7 +65,7 @@ cat > $THT/roles_data_undercloud.yaml <<EOF
     - OS::TripleO::Services::Pacemaker
     - OS::TripleO::Services::RabbitMQ
     - OS::TripleO::Services::Redis
-    - OS::TripleO::Services::HAProxy
+    - OS::TripleO::Services::HAproxy
     - OS::TripleO::Services::MySQL
     - OS::TripleO::Services::MySQLClient
     - OS::TripleO::Services::Clustercheck
