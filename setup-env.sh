@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # dependencies
-yum install -y emacs-nox yum-utils ntp fence-agents-all
+yum install -y emacs-nox yum-utils ntp fence-agents-all git
 # pip is in epel
 yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install -y python2-pip
 pip install git-review netaddr
 yum-config-manager --disable epel epel-testing
-# builds for new pacemaker
-yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
+# undercloud_containers is what we base our setup upon
+git clone https://github.com/dprince/undercloud_containers $HOME/undercloud_containers
 
 # general config
 . $(dirname ${BASH_SOURCE[0]})/config
@@ -18,19 +18,20 @@ LOCAL_IFACE=${LOCAL_IFACE:-`/usr/sbin/ip -4 route get 8.8.8.8 | awk {'print $5'}
 ip a add 192.168.24.1/32 dev $LOCAL_IFACE
 export LOCAL_REGISTRY=192.168.24.1:8787
 
-if [ -x ./pre-uc-setup.sh ]; then
-    ./pre-uc-setup.sh
+if [ -x $(dirname ${BASH_SOURCE[0]})/pre-uc-setup.sh ]; then
+    $(dirname ${BASH_SOURCE[0]})/pre-uc-setup.sh
 else
+    # builds for new pacemaker
+    yum-config-manager --add-repo http://people.redhat.com/mbaldess/rpms/container-repo/pacemaker-bundle.repo && yum install -y pacemaker pacemaker-remote pcs libqb resource-agents
     yum install -y centos-release-openstack-ocata
 fi
 
 # install dprince's containerized undercloud environment
 # configure it based on LOCAL_IFACE and LOCAL_REGISTRY
-git clone https://github.com/dprince/undercloud_containers $HOME/undercloud_containers
 (cd $HOME/undercloud_containers && ./doit.sh)
 
-if [ -x ./post-uc-setup.sh ]; then
-    ./post-uc-setup.sh
+if [ -x $(dirname ${BASH_SOURCE[0]})/post-uc-setup.sh ]; then
+    $(dirname ${BASH_SOURCE[0]})/post-uc-setup.sh
 else
     yum-config-manager --disable epel epel-testing delorean delorean-pike-testing
 fi
