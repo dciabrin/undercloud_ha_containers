@@ -91,3 +91,8 @@ done
 sudo docker ps -qa | xargs sudo docker rm -f
 sudo docker volume ls -q | xargs sudo docker volume rm
 EOF
+
+cat >> $HOME/custom.yaml <<EOF
+  DockerNamespace: ${DOCKER_NAMESPACE}
+  DockerNamespaceIsRegistry: true
+EOF
