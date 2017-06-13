@@ -84,7 +84,7 @@ pcs cluster destroy
 killall epmd
 rm -rf /var/lib/mysql
 rm -rf /var/lib/rabbitmq
-for i in /var/log/puppet /var/lib/config-data /var/lib/heat-config/deployed /etc/puppet/hieradata /var/lib/docker-puppet /var/log/pacemaker/bundles; do
+for i in /var/log/puppet /var/lib/config-data /var/lib/heat-config/deployed /var/lib/heat-config/heat-config-ansible /var/lib/heat-config/heat-config-script /var/lib/tripleo-config /var/lib/os-collect-config /etc/puppet/hieradata /var/lib/docker-puppet /var/log/pacemaker/bundles; do
   find \$i/ -type f -or -type l -delete
   rm -rf \$i/*
 done
