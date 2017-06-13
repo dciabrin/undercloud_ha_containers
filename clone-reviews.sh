@@ -7,7 +7,7 @@ pushd $HOME/gerrit
 co_repo tripleo-heat-templates rabbitmq-tht 452889
 co_repo tripleo-heat-templates mysql-tht 455348
 co_repo tripleo-heat-templates clustercheck-tht 457800
-co_repo tripleo-heat-templates haproxy-tht 459597
+co_repo tripleo-heat-templates haproxy-tht 473473 # merged: 459597
 co_repo tripleo-heat-templates redis-tht 464958
 co_repo tripleo-heat-templates cinder-volume-tht 467752
 co_repo tripleo-heat-templates cinder-backup-tht 470403
