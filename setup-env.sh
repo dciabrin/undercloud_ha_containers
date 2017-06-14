@@ -43,19 +43,19 @@ systemctl enable docker docker-distribution
 systemctl stop docker docker-distribution
 systemctl start docker docker-distribution
 
-# re-clone tripleo-heat-templates and cherry pick cinder and manila ongoing reviews
-rm -rf $HOME/tripleo-heat-templates
-git clone https://github.com/openstack/tripleo-heat-templates $HOME/tripleo-heat-templates
-pushd $HOME/tripleo-heat-templates
-# iscsid
-git fetch git://git.openstack.org/openstack/tripleo-heat-templates refs/changes/38/462538/9 && git cherry-pick FETCH_HEAD
-# multipathd
-# git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/89/465989/3 && git cherry-pick FETCH_HEAD
-# cinder-api
-# git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/11/457011/14 && git cherry-pick FETCH_HEAD
-# cinder-volume
-# git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/20/457820/10 && git cherry-pick FETCH_HEAD
-# manila-share
+# # re-clone tripleo-heat-templates and cherry pick cinder and manila ongoing reviews
+# rm -rf $HOME/tripleo-heat-templates
+# git clone https://github.com/openstack/tripleo-heat-templates $HOME/tripleo-heat-templates
+# pushd $HOME/tripleo-heat-templates
+# # iscsid
+# # git fetch git://git.openstack.org/openstack/tripleo-heat-templates refs/changes/38/462538/9 && git cherry-pick FETCH_HEAD
+# # multipathd
+# # git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/89/465989/3 && git cherry-pick FETCH_HEAD
+# # cinder-api
+# # git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/11/457011/14 && git cherry-pick FETCH_HEAD
+# # cinder-volume
+# # git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/20/457820/10 && git cherry-pick FETCH_HEAD
+# # manila-share
 popd
 
 # clone the HA reviews and set hard link in tripleo-heat-templates and
