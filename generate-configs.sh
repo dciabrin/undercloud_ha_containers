@@ -90,6 +90,9 @@ for i in /var/log/puppet /var/lib/config-data /var/lib/heat-config/deployed /var
 done
 sudo docker ps -qa | xargs sudo docker rm -f
 sudo docker volume ls -q | xargs sudo docker volume rm
+iptables -F INPUT
+iptables -F FORWARD
+sudo systemctl restart docker
 EOF
 
 cat >> $HOME/custom.yaml <<EOF
