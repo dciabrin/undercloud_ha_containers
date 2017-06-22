@@ -31,8 +31,8 @@ co_repo puppet-tripleo haproxy-pp 474947 # merged: 458832
 for i in haproxy; do (cd $i-pp && link_repo $PP); done
 
 (cd /etc/puppet/modules && rm -rf pacemaker && co_repo puppet-pacemaker pacemaker)
-# co_repo puppet-pacemaker puppet-pacemaker # merged: 472781 463170
-# (cd puppet-pacemaker && link_repo /etc/puppet/modules/pacemaker)
+co_repo puppet-pacemaker puppet-pacemaker 476486 # merged: 472781 463170
+(cd puppet-pacemaker && link_repo /etc/puppet/modules/pacemaker)
 
 # MERGED
 # co_repo tripleo-common tripleo-common 456174
