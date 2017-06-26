@@ -10,13 +10,13 @@ pushd $HOME/gerrit
 # co_repo tripleo-heat-templates mysql-tht # merged: 455348
 # co_repo tripleo-heat-templates clustercheck-tht # merged: 457800
 co_repo tripleo-heat-templates haproxy-tht 474943 # merged: 473473 459597
-co_repo tripleo-heat-templates mysql-client-tht 466531 #
+# co_repo tripleo-heat-templates mysql-client-tht # merged: 466531
 co_repo tripleo-heat-templates use-mysql-client-tht 469372 #
 # co_repo tripleo-heat-templates redis-tht # merged: 464958
 # co_repo tripleo-heat-templates cinder-volume-tht # merged: 467752
-co_repo tripleo-heat-templates cinder-backup-tht # merged: 470403
+# co_repo tripleo-heat-templates cinder-backup-tht # merged: 470403
 # for i in rabbitmq mysql clustercheck haproxy redis cinder-volume cinder-backup; do (cd $i-tht && link_repo $THT); done
-for i in haproxy mysql-client use-mysql-client cinder-backup; do (cd $i-tht && link_repo $THT); done
+for i in haproxy use-mysql-client; do (cd $i-tht && link_repo $THT); done
 
 # co_repo puppet-tripleo rabbitmq-pp # merged: 455189
 # co_repo puppet-tripleo mysql-pp # merged: 455345
