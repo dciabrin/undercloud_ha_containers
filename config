@@ -1,4 +1,4 @@
-DEPLOY_CMD_CONFIG="-e /root/tripleo-heat-templates/environments/puppet-pacemaker.yaml -e /root/tripleo-heat-templates/environments/docker.yaml -e /root/tripleo-heat-templates/environments/ha-docker.yaml "
+DEPLOY_CMD_CONFIG="-e /root/tripleo-heat-templates/environments/docker.yaml -e /root/tripleo-heat-templates/environments/docker-ha.yaml "
 DOCKER_NAMESPACE=192.168.24.1:8787/tripleoupstream
 DOCKER_REGISTRY_EXTRA_CONFIG=
 DOCKER_IMAGE_TAG=

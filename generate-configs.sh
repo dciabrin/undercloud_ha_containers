@@ -24,6 +24,7 @@ STORAGE_MGMT_VIRTUAL_IP=${STORAGE_MGMT_VIRTUAL_IP:-$(python -c "import netaddr; 
 STORAGE_VIRTUAL_IP=${STORAGE_VIRTUAL_IP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-9]")}
 MYSQL_VIP=${MYSQL_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-10]")}
 GLANCE_API_VIP=${GLANCE_API_VIP:-$(python -c "import netaddr; print netaddr.IPNetwork('$LOCAL_IP_NETWORK')[-11]")}
+MYSQL_VIP=${INTERNAL_API_VIRTUAL_IP}
 
 VIP_CONFIG=$HOME/tripleo-heat-templates/puppet/all-nodes-config.yaml
 sed -i 's%\(controller_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$CONTROLLER_VIRTUAL_IP'%' $VIP_CONFIG
@@ -37,21 +38,13 @@ sed -i 's%\(storage_virtual_ip:\) {get_param: \[NetVipMap.*%\1 '$STORAGE_VIRTUAL
 sed -i 's%\( *\)\(redis_vip:.*\)%\1\2\n\1mysql_vip: '$MYSQL_VIP'%' $VIP_CONFIG
 sed -i 's%\( *\)\(redis_vip:.*\)%\1\2\n\1glance_api_vip: '$GLANCE_API_VIP'%' $VIP_CONFIG
 
-# create config files for deploying the HA containers
-cat > $THT/environments/ha-docker.yaml <<EOF
-resource_registry:
-  OS::TripleO::Services::MySQL: ../docker/services/pacemaker/database/mysql.yaml
-  OS::TripleO::Services::RabbitMQ: ../docker/services/pacemaker/rabbitmq.yaml
-  OS::TripleO::Services::Redis: ../docker/services/pacemaker/database/redis.yaml
-  OS::TripleO::Services::HAproxy: ../docker/services/pacemaker/haproxy.yaml
-  OS::TripleO::Services::Clustercheck: ../docker/services/pacemaker/clustercheck.yaml
-  OS::TripleO::Services::CinderVolume: ../docker/services/pacemaker/cinder-volume.yaml
-  OS::TripleO::Services::CinderBackup: ../docker/services/pacemaker/cinder-backup.yaml
+# todo: find the proper network setup to override this setting cleanly
+ENDPOINT_MAP_CONFIG=$HOME/tripleo-heat-templates/network/endpoints/endpoint_map.yaml
+sed -i 's/\(MysqlInternal.*mysql.*host\):.*/\1: '"'${MYSQL_VIP}'"'}/' $ENDPOINT_MAP_CONFIG
 
-parameter_defaults:
-  DockerNamespace: 192.168.24.1:8787/tripleoupstream
-  DockerNamespaceIsRegistry: true
-EOF
+NET_IP_MAP_CONFIG=$HOME/tripleo-heat-templates/network/ports/net_ip_map.yaml
+# sed -i 's%\( *\)\(internal_api\): .*%\1\2: '$INTERNAL_API_VIRTUAL_IP'%' $NET_IP_MAP_CONFIG
+# sed -i 's%\( *\)\(internal_api_uri\): .*%\1\2: '$INTERNAL_API_VIRTUAL_IP'%' $NET_IP_MAP_CONFIG
 
 cat > $THT/roles_data_undercloud.yaml <<EOF
 - name: Undercloud
@@ -67,7 +60,7 @@ cat > $THT/roles_data_undercloud.yaml <<EOF
     - OS::TripleO::Services::Redis
     - OS::TripleO::Services::HAproxy
     - OS::TripleO::Services::MySQL
-    # - OS::TripleO::Services::MySQLClient
+    - OS::TripleO::Services::MySQLClient
     - OS::TripleO::Services::Clustercheck
     # - OS::TripleO::Services::CinderVolume
     # - OS::TripleO::Services::CinderBackup
@@ -90,6 +83,10 @@ for i in /var/log/puppet /var/lib/config-data /var/lib/heat-config/deployed /var
 done
 sudo docker ps -qa | xargs sudo docker rm -f
 sudo docker volume ls -q | xargs sudo docker volume rm
+# avoid side effect caused by bad config in roles_data_undercloud
+rm -rf /etc/corosync/corosync.d
+pcs cluster destroy --force
+# clean tripleo firewall, restart docker to reset its firwall rules
 iptables -F INPUT
 iptables -F FORWARD
 sudo systemctl restart docker
