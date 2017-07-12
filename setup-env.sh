@@ -28,6 +28,7 @@ fi
 
 # install dprince's containerized undercloud environment
 # configure it based on LOCAL_IFACE and LOCAL_REGISTRY
+rm -rf $HOME/tripleo-heat-templates
 (cd $HOME/undercloud_containers && ./doit.sh)
 
 if [ -x $(dirname ${BASH_SOURCE[0]})/post-uc-setup.sh ]; then
@@ -36,33 +37,28 @@ else
     yum-config-manager --disable epel epel-testing delorean delorean-pike-testing
 fi
 
+# autorize pcs on the host
+echo 'hacluster' | passwd hacluster --stdin
+pcs cluster auth $HOSTNAME --force -u hacluster -p hacluster
+
 yum install -y docker docker-registry
-echo "INSECURE_REGISTRY=\"--insecure-registry ${LOCAL_REGISTRY} ${DOCKER_REGISTRY_EXTRA_CONFIG}\"" >> /etc/sysconfig/docker
-sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
+if ! grep -q '^INSECURE_REGISTRY' /etc/sysconfig/docker; then
+    echo "INSECURE_REGISTRY=\"--insecure-registry ${LOCAL_REGISTRY} ${DOCKER_REGISTRY_EXTRA_CONFIG}\"" >> /etc/sysconfig/docker
+fi
+if ! grep -q '^proxy:' /etc/docker-distribution/registry/config.yml; then
+    echo -e "proxy:\n    remoteurl: https://registry-1.docker.io" >> /etc/docker-distribution/registry/config.yml
+    sed -i "s/addr:.*/addr: ${LOCAL_REGISTRY}/" /etc/docker-distribution/registry/config.yml
+fi
 systemctl enable docker docker-distribution
 systemctl stop docker docker-distribution
 systemctl start docker docker-distribution
-
-# # re-clone tripleo-heat-templates and cherry pick cinder and manila ongoing reviews
-# rm -rf $HOME/tripleo-heat-templates
-# git clone https://github.com/openstack/tripleo-heat-templates $HOME/tripleo-heat-templates
-# pushd $HOME/tripleo-heat-templates
-# # iscsid
-# # git fetch git://git.openstack.org/openstack/tripleo-heat-templates refs/changes/38/462538/9 && git cherry-pick FETCH_HEAD
-# # multipathd
-# # git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/89/465989/3 && git cherry-pick FETCH_HEAD
-# # cinder-api
-# # git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/11/457011/14 && git cherry-pick FETCH_HEAD
-# # cinder-volume
-# # git fetch https://git.openstack.org/openstack/tripleo-heat-templates refs/changes/20/457820/10 && git cherry-pick FETCH_HEAD
-# # manila-share
-popd
 
 # clone the HA reviews and set hard link in tripleo-heat-templates and
 # puppet-tripleo directories
 . $(dirname ${BASH_SOURCE[0]})/clone-reviews.sh
 
 # setup kolla build environment
+rm -rf $HOME/kolla
 mkdir $HOME/kolla
 git clone https://github.com/openstack/kolla $HOME/kolla
 pushd $HOME/kolla
@@ -75,4 +71,4 @@ popd
 # puppet-tripleo directories
 . $(dirname ${BASH_SOURCE[0]})/generate-configs.sh
 
-echo -e "\nSetup done. Run build-kolla-images.sh before deploying your containers\n"
+echo -e "\nSetup done. Adapt $HOME/tripleo-heat-templates/roles_data_undercloud.yaml and type $HOME/run.sh to deploy your containers\n"
