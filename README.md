@@ -13,9 +13,9 @@ Create a base image for the VM
 
     $ virt-builder centos-7.3 --size 150G --root-password password:centos --hostname centos
 
-Install the VM (wait a bit and CTRL-C virt-install to return to shell)
+Install the VM
 
-    $ virt-install --name undercloud --memory 32768 --vcpu 4 --network bridge=virbr0 --disk centos-7.3.img --import
+    $ virt-install --name undercloud --memory 32768 --vcpu 4 --network bridge=virbr0 --disk centos-7.3.img --import --wait 1
 
 Look for the IP that has been assigned to the newly created VM
 
@@ -40,21 +40,23 @@ Prepare the undercloud helpers. Some config settings (e.g. VIP) can be customize
 
     # ./undercloud_ha_containers/setup-env.sh
     ...
-    Setup done. Run build-kolla-images.sh before deploying your containers
+    Setup done. Adapt /root/tripleo-heat-templates/roles_data_undercloud.yaml and type /root/run.sh to deploy your containers
 
-Pull Kolla images for a few Openstack services and rebuild the images for the core HA services
+If you want to manually rebuild the kolla images for core HA services
 
     # ./undercloud_ha_containers/build-kolla-images.sh
 
-Deploy a minimal containerized HA undercloud. 
-The deploy command line fails due to the deploy not enabling all
-openstack services, but the ha cluster is functional.
+Deploy a minimal containerized HA undercloud. You will get a STACK_CREATE complete, which indicates a succesful deployment.
 
     # $HOME/run.sh
+    [...]
+    2017-07-12 14:18:45Z [undercloud]: CREATE_COMPLETE  Stack CREATE completed successfully
+    
+    Deploy Successful.
+    [...]
     # crm_mon -1
 
 Further cleanup and redeploy can be done with:
 
     # $HOME/cleanup.sh
     # $HOME/run.sh
-
